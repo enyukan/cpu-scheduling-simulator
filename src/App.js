@@ -1,10 +1,12 @@
-function App() {
+import React from "react";
+
+const App = () => {
   return (
-    <div>
-      <h1>Hello, Enyu!</h1>
-      <p>Welcome to your CPU Scheduling Simulator project.</p>
+    <div className="App">
+      <h1>CPU Scheduling Simulator</h1>
+      <p>Welcome! This project will simulate various CPU scheduling algorithms.</p>
     </div>
   );
-}
+};
 
 export default App;

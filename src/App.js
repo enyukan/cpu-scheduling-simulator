@@ -4,6 +4,7 @@ const App = () => {
   const [numProcesses, setNumProcesses] = useState(5);
   const [timeQuantum, setTimeQuantum] = useState(2);
   const [processes, setProcesses] = useState([]);
+  const [fifoResults, setFifoResults] = useState([]);
 
   // Function to generate random processes
   const generateProcesses = () => {
@@ -13,6 +14,32 @@ const App = () => {
       burstTime: Math.floor(Math.random() * 10) + 1, // Random burst time between 1-10
     }));
     setProcesses(newProcesses);
+    setFifoResults([]); // Reset FIFO results when new processes are generated
+  };
+
+  // FIFO Scheduling Algorithm
+  const runFIFO = () => {
+    if (processes.length === 0) return;
+
+    // Sort processes by arrival time (FIFO order)
+    const sortedProcesses = [...processes].sort((a, b) => a.arrivalTime - b.arrivalTime);
+
+    let currentTime = 0;
+    let results = sortedProcesses.map((process) => {
+      const startTime = Math.max(currentTime, process.arrivalTime);
+      const finishTime = startTime + process.burstTime;
+      currentTime = finishTime;
+
+      return {
+        ...process,
+        startTime,
+        finishTime,
+        turnaroundTime: finishTime - process.arrivalTime,
+        waitingTime: startTime - process.arrivalTime,
+      };
+    });
+
+    setFifoResults(results);
   };
 
   return (
@@ -43,9 +70,17 @@ const App = () => {
 
       <button 
         onClick={generateProcesses}
-        style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer" }}
+        style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", marginRight: "10px" }}
       >
         Generate Processes
+      </button>
+
+      <button 
+        onClick={runFIFO}
+        style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer" }}
+        disabled={processes.length === 0}
+      >
+        Run FIFO
       </button>
 
       {processes.length > 0 && (
@@ -65,6 +100,34 @@ const App = () => {
                   <td style={{ padding: "8px" }}>{process.id}</td>
                   <td style={{ padding: "8px" }}>{process.arrivalTime}</td>
                   <td style={{ padding: "8px" }}>{process.burstTime}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {fifoResults.length > 0 && (
+        <div style={{ marginTop: "20px" }}>
+          <h2>FIFO Scheduling Results</h2>
+          <table border="1" style={{ margin: "auto", borderCollapse: "collapse", width: "60%" }}>
+            <thead>
+              <tr>
+                <th style={{ padding: "8px" }}>Process ID</th>
+                <th style={{ padding: "8px" }}>Start Time</th>
+                <th style={{ padding: "8px" }}>Finish Time</th>
+                <th style={{ padding: "8px" }}>Turnaround Time</th>
+                <th style={{ padding: "8px" }}>Waiting Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fifoResults.map((result) => (
+                <tr key={result.id}>
+                  <td style={{ padding: "8px" }}>{result.id}</td>
+                  <td style={{ padding: "8px" }}>{result.startTime}</td>
+                  <td style={{ padding: "8px" }}>{result.finishTime}</td>
+                  <td style={{ padding: "8px" }}>{result.turnaroundTime}</td>
+                  <td style={{ padding: "8px" }}>{result.waitingTime}</td>
                 </tr>
               ))}
             </tbody>

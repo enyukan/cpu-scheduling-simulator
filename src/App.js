@@ -6,6 +6,7 @@ const App = () => {
   const [processes, setProcesses] = useState([]);
   const [fifoResults, setFifoResults] = useState([]);
   const [sjfResults, setSjfResults] = useState([]);
+  const [stcfResults, setStcfResults] = useState([]);
 
   // Function to generate random processes
   const generateProcesses = () => {
@@ -84,9 +85,46 @@ const App = () => {
         currentTime = sortedProcesses[0].arrivalTime;
       }
     }
-
-    setSjfResults(completedProcesses);
+    setSjfResults(completedProcesses);    
   };
+
+    // STCF (Shortest Time-to-Completion First) Scheduling Algorithm
+  const runSTCF = () => {
+    if (processes.length === 0) return;
+
+    let sortedProcesses = [...processes].sort((a, b) => a.arrivalTime - b.arrivalTime);
+    let currentTime = 0;
+    let readyQueue = [];
+    let completedProcesses = [];
+    let remainingBurstTime = sortedProcesses.map(p => ({ ...p, remainingTime: p.burstTime }));
+
+    while (remainingBurstTime.length > 0 || readyQueue.length > 0) {
+      while (remainingBurstTime.length > 0 && remainingBurstTime[0].arrivalTime <= currentTime) {
+        readyQueue.push(remainingBurstTime.shift());
+      }
+
+      if (readyQueue.length > 0) {
+        readyQueue.sort((a, b) => a.remainingTime - b.remainingTime);
+        let process = readyQueue[0];
+
+        process.remainingTime--;
+        currentTime++;
+
+        if (process.remainingTime === 0) {
+          process.finishTime = currentTime;
+          process.turnaroundTime = process.finishTime - process.arrivalTime;
+          process.waitingTime = process.turnaroundTime - process.burstTime;
+          completedProcesses.push(process);
+          readyQueue.shift();
+        }
+      } else {
+        currentTime = remainingBurstTime[0]?.arrivalTime || currentTime + 1;
+      }
+    }
+
+    setStcfResults(completedProcesses);
+  };
+
 
   return (
     <div style={{ textAlign: "center", fontFamily: "Arial, sans-serif", margin: "20px" }}>
@@ -135,6 +173,14 @@ const App = () => {
         disabled={processes.length === 0}
       >
         Run SJF
+      </button>
+
+      <button 
+        onClick={runSTCF}
+        style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", marginLeft: "10px" }}
+        disabled={processes.length === 0}
+      >
+        Run STCF
       </button>
 
       {processes.length > 0 && (
@@ -207,6 +253,32 @@ const App = () => {
                 <tr key={result.id}>
                   <td style={{ padding: "8px" }}>{result.id}</td>
                   <td style={{ padding: "8px" }}>{result.startTime}</td>
+                  <td style={{ padding: "8px" }}>{result.finishTime}</td>
+                  <td style={{ padding: "8px" }}>{result.turnaroundTime}</td>
+                  <td style={{ padding: "8px" }}>{result.waitingTime}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {stcfResults.length > 0 && (
+        <div style={{ marginTop: "20px" }}>
+          <h2>STCF Scheduling Results</h2>
+          <table border="1" style={{ margin: "auto", borderCollapse: "collapse", width: "60%" }}>
+            <thead>
+              <tr>
+                <th style={{ padding: "8px" }}>Process ID</th>
+                <th style={{ padding: "8px" }}>Finish Time</th>
+                <th style={{ padding: "8px" }}>Turnaround Time</th>
+                <th style={{ padding: "8px" }}>Waiting Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stcfResults.map((result) => (
+                <tr key={result.id}>
+                  <td style={{ padding: "8px" }}>{result.id}</td>
                   <td style={{ padding: "8px" }}>{result.finishTime}</td>
                   <td style={{ padding: "8px" }}>{result.turnaroundTime}</td>
                   <td style={{ padding: "8px" }}>{result.waitingTime}</td>

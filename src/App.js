@@ -7,6 +7,7 @@ const App = () => {
   const [fifoResults, setFifoResults] = useState([]);
   const [sjfResults, setSjfResults] = useState([]);
   const [stcfResults, setStcfResults] = useState([]);
+  const [roundRobinResults, setRoundRobinResults] = useState([]);
 
   // Function to generate random processes
   const generateProcesses = () => {
@@ -17,7 +18,9 @@ const App = () => {
     }));
     setProcesses(newProcesses);
     setFifoResults([]);
-    setSjfResults([]); // Reset SJF results when new processes are generated
+    setSjfResults([]); 
+    setStcfResults([]);
+    setRoundRobinResults([]);
   };
 
   // FIFO Scheduling Algorithm
@@ -125,6 +128,43 @@ const App = () => {
     setStcfResults(completedProcesses);
   };
 
+    // RR (Round Robin) Scheduling Algorithm
+    const runRR = () => {
+      if (processes.length === 0) return;
+    
+      let remainingBurstTime = processes.map(p => ({ ...p, remainingTime: p.burstTime }));
+      let queue = [];
+      let currentTime = 0;
+      let completedProcesses = [];
+    
+      while (remainingBurstTime.length > 0 || queue.length > 0) {
+        while (remainingBurstTime.length > 0 && remainingBurstTime[0].arrivalTime <= currentTime) {
+          queue.push(remainingBurstTime.shift());
+        }
+    
+        if (queue.length > 0) {
+          let process = queue.shift();
+          let burst = Math.min(process.remainingTime, timeQuantum);
+    
+          process.remainingTime -= burst;
+          currentTime += burst;
+    
+          if (process.remainingTime === 0) {
+            process.finishTime = currentTime;
+            process.turnaroundTime = process.finishTime - process.arrivalTime;
+            process.waitingTime = process.turnaroundTime - process.burstTime;
+            completedProcesses.push(process);
+          } else {
+            queue.push(process);
+          }
+        } else {
+          currentTime = remainingBurstTime[0]?.arrivalTime || currentTime + 1;
+        }
+      }
+    
+      setRoundRobinResults(completedProcesses);
+    };
+  
 
   return (
     <div style={{ textAlign: "center", fontFamily: "Arial, sans-serif", margin: "20px" }}>
@@ -183,6 +223,14 @@ const App = () => {
         Run STCF
       </button>
 
+      <button 
+        onClick={runRR}
+        style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", marginLeft: "10px" }}
+        disabled={processes.length === 0}
+      >
+        Run RR
+      </button>
+
       {processes.length > 0 && (
         <div style={{ marginTop: "20px" }}>
           <h2>Generated Processes</h2>
@@ -207,7 +255,7 @@ const App = () => {
         </div>
       )}
 
-{fifoResults.length > 0 && (
+      {fifoResults.length > 0 && (
         <div style={{ marginTop: "20px" }}>
           <h2>FIFO Scheduling Results</h2>
           <table border="1" style={{ margin: "auto", borderCollapse: "collapse", width: "60%" }}>
@@ -288,6 +336,32 @@ const App = () => {
           </table>
         </div>
       )}
+
+      {roundRobinResults.length > 0 && (
+        <div style={{ marginTop: "20px" }}>
+        <h2>RR Scheduling Results</h2>
+        <table border="1" style={{ margin: "auto", borderCollapse: "collapse", width: "60%" }}>
+          <thead>
+            <tr>
+              <th style={{ padding: "8px" }}>Process ID</th>
+              <th style={{ padding: "8px" }}>Finish Time</th>
+              <th style={{ padding: "8px" }}>Turnaround Time</th>
+              <th style={{ padding: "8px" }}>Waiting Time</th>
+            </tr>
+          </thead>
+          <tbody>
+          {roundRobinResults.map((result) => (
+            <tr key={result.id}>
+              <td style={{ padding: "8px" }}>{result.id}</td>
+              <td style={{ padding: "8px" }}>{result.finishTime}</td>
+              <td style={{ padding: "8px" }}>{result.turnaroundTime}</td>
+              <td style={{ padding: "8px" }}>{result.waitingTime}</td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
+      </div>
+    )}
 
     </div>
 

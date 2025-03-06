@@ -5,6 +5,7 @@ const App = () => {
   const [timeQuantum, setTimeQuantum] = useState(2);
   const [processes, setProcesses] = useState([]);
   const [fifoResults, setFifoResults] = useState([]);
+  const [sjfResults, setSjfResults] = useState([]);
 
   // Function to generate random processes
   const generateProcesses = () => {
@@ -14,32 +15,77 @@ const App = () => {
       burstTime: Math.floor(Math.random() * 10) + 1, // Random burst time between 1-10
     }));
     setProcesses(newProcesses);
-    setFifoResults([]); // Reset FIFO results when new processes are generated
+    setFifoResults([]);
+    setSjfResults([]); // Reset SJF results when new processes are generated
   };
 
   // FIFO Scheduling Algorithm
   const runFIFO = () => {
-    if (processes.length === 0) return;
-
-    // Sort processes by arrival time (FIFO order)
-    const sortedProcesses = [...processes].sort((a, b) => a.arrivalTime - b.arrivalTime);
-
+    console.log("FIFO button clicked!"); // Debug log
+  
+    if (processes.length === 0) {
+      console.log("No processes available!"); // Debug log
+      return;
+    }
+  
+    let sortedProcesses = [...processes].sort((a, b) => a.arrivalTime - b.arrivalTime);
     let currentTime = 0;
-    let results = sortedProcesses.map((process) => {
+    let results = [];
+  
+    sortedProcesses.forEach((process) => {
       const startTime = Math.max(currentTime, process.arrivalTime);
       const finishTime = startTime + process.burstTime;
       currentTime = finishTime;
-
-      return {
+  
+      results.push({
         ...process,
         startTime,
         finishTime,
         turnaroundTime: finishTime - process.arrivalTime,
         waitingTime: startTime - process.arrivalTime,
-      };
+      });
     });
-
+  
+    console.log("FIFO results calculated:", results); // Debug log
+  
     setFifoResults(results);
+  };
+  
+  // SJF (Shortest Job First) Scheduling Algorithm
+  const runSJF = () => {
+    if (processes.length === 0) return;
+
+    let sortedProcesses = [...processes].sort((a, b) => a.arrivalTime - b.arrivalTime);
+    let currentTime = 0;
+    let readyQueue = [];
+    let completedProcesses = [];
+
+    while (sortedProcesses.length > 0 || readyQueue.length > 0) {
+      while (sortedProcesses.length > 0 && sortedProcesses[0].arrivalTime <= currentTime) {
+        readyQueue.push(sortedProcesses.shift());
+      }
+
+      if (readyQueue.length > 0) {
+        readyQueue.sort((a, b) => a.burstTime - b.burstTime);
+        let process = readyQueue.shift();
+
+        let startTime = Math.max(currentTime, process.arrivalTime);
+        let finishTime = startTime + process.burstTime;
+        currentTime = finishTime;
+
+        completedProcesses.push({
+          ...process,
+          startTime,
+          finishTime,
+          turnaroundTime: finishTime - process.arrivalTime,
+          waitingTime: startTime - process.arrivalTime,
+        });
+      } else {
+        currentTime = sortedProcesses[0].arrivalTime;
+      }
+    }
+
+    setSjfResults(completedProcesses);
   };
 
   return (
@@ -77,10 +123,18 @@ const App = () => {
 
       <button 
         onClick={runFIFO}
-        style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer" }}
+        style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", marginRight: "10px" }}
         disabled={processes.length === 0}
       >
         Run FIFO
+      </button>
+
+      <button 
+        onClick={runSJF}
+        style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer" }}
+        disabled={processes.length === 0}
+      >
+        Run SJF
       </button>
 
       {processes.length > 0 && (
@@ -107,7 +161,7 @@ const App = () => {
         </div>
       )}
 
-      {fifoResults.length > 0 && (
+{fifoResults.length > 0 && (
         <div style={{ marginTop: "20px" }}>
           <h2>FIFO Scheduling Results</h2>
           <table border="1" style={{ margin: "auto", borderCollapse: "collapse", width: "60%" }}>
@@ -134,7 +188,37 @@ const App = () => {
           </table>
         </div>
       )}
+
+      {sjfResults.length > 0 && (
+        <div style={{ marginTop: "20px" }}>
+          <h2>SJF Scheduling Results</h2>
+          <table border="1" style={{ margin: "auto", borderCollapse: "collapse", width: "60%" }}>
+            <thead>
+              <tr>
+                <th style={{ padding: "8px" }}>Process ID</th>
+                <th style={{ padding: "8px" }}>Start Time</th>
+                <th style={{ padding: "8px" }}>Finish Time</th>
+                <th style={{ padding: "8px" }}>Turnaround Time</th>
+                <th style={{ padding: "8px" }}>Waiting Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sjfResults.map((result) => (
+                <tr key={result.id}>
+                  <td style={{ padding: "8px" }}>{result.id}</td>
+                  <td style={{ padding: "8px" }}>{result.startTime}</td>
+                  <td style={{ padding: "8px" }}>{result.finishTime}</td>
+                  <td style={{ padding: "8px" }}>{result.turnaroundTime}</td>
+                  <td style={{ padding: "8px" }}>{result.waitingTime}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
     </div>
+
   );
 };
 

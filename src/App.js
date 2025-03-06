@@ -8,6 +8,7 @@ const App = () => {
   const [sjfResults, setSjfResults] = useState([]);
   const [stcfResults, setStcfResults] = useState([]);
   const [roundRobinResults, setRoundRobinResults] = useState([]);
+  const [mlfqResults, setMlfqResults] = useState([]);
 
   // Function to generate random processes
   const generateProcesses = () => {
@@ -21,6 +22,7 @@ const App = () => {
     setSjfResults([]); 
     setStcfResults([]);
     setRoundRobinResults([]);
+    setMlfqResults([]);
   };
 
   // FIFO Scheduling Algorithm
@@ -164,8 +166,92 @@ const App = () => {
     
       setRoundRobinResults(completedProcesses);
     };
-  
 
+    // MLFQ (Multi-Level Feedback Queue) Scheduling Algorithm
+    const runMLFQ = () => {
+      if (processes.length === 0) return;
+
+      let currentTime = 0;
+      let completedProcesses = [];
+      
+      // Define multiple queues for different levels of priority
+      let queue1 = []; // Highest priority queue
+      let queue2 = []; // Second priority queue
+      let queue3 = []; // Lowest priority queue
+
+      let remainingProcesses = processes.map(p => ({ ...p, remainingTime: p.burstTime, level: 1 }));
+      
+      // Sort processes based on arrival time
+      remainingProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime);
+
+      const timeQuantum1 = 2; // Time quantum for queue 1 (highest priority)
+      const timeQuantum2 = 4; // Time quantum for queue 2 (second priority)
+      const timeQuantum3 = 6; // Time quantum for queue 3 (lowest priority)
+
+      while (remainingProcesses.length > 0 || queue1.length > 0 || queue2.length > 0 || queue3.length > 0) {
+        // Move processes into the appropriate queues based on arrival time
+        while (remainingProcesses.length > 0 && remainingProcesses[0].arrivalTime <= currentTime) {
+          let process = remainingProcesses.shift();
+          queue1.push(process); // Initially all processes enter the highest priority queue
+        }
+
+        // Process from Queue 1
+        if (queue1.length > 0) {
+          let process = queue1.shift();
+          let burst = Math.min(process.remainingTime, timeQuantum1);
+          process.remainingTime -= burst;
+          currentTime += burst;
+
+          if (process.remainingTime === 0) {
+            process.finishTime = currentTime;
+            process.turnaroundTime = process.finishTime - process.arrivalTime;
+            process.waitingTime = process.turnaroundTime - process.burstTime;
+            completedProcesses.push(process);
+          } else {
+            queue2.push({ ...process, level: 2 }); // Move to Queue 2 if not finished
+          }
+        }
+        // Process from Queue 2
+        else if (queue2.length > 0) {
+          let process = queue2.shift();
+          let burst = Math.min(process.remainingTime, timeQuantum2);
+          process.remainingTime -= burst;
+          currentTime += burst;
+
+          if (process.remainingTime === 0) {
+            process.finishTime = currentTime;
+            process.turnaroundTime = process.finishTime - process.arrivalTime;
+            process.waitingTime = process.turnaroundTime - process.burstTime;
+            completedProcesses.push(process);
+          } else {
+            queue3.push({ ...process, level: 3 }); // Move to Queue 3 if not finished
+          }
+        }
+        // Process from Queue 3
+        else if (queue3.length > 0) {
+          let process = queue3.shift();
+          let burst = Math.min(process.remainingTime, timeQuantum3);
+          process.remainingTime -= burst;
+          currentTime += burst;
+
+          if (process.remainingTime === 0) {
+            process.finishTime = currentTime;
+            process.turnaroundTime = process.finishTime - process.arrivalTime;
+            process.waitingTime = process.turnaroundTime - process.burstTime;
+            completedProcesses.push(process);
+          } else {
+            queue3.push(process); // Keep in Queue 3 if not finished
+          }
+        } else {
+          currentTime++; // If no processes are ready to be processed, increment time
+        }
+      }
+
+      setMlfqResults(completedProcesses);
+    };
+
+
+    
   return (
     <div style={{ textAlign: "center", fontFamily: "Arial, sans-serif", margin: "20px" }}>
       <h1>CPU Scheduling Simulator</h1>
@@ -229,6 +315,14 @@ const App = () => {
         disabled={processes.length === 0}
       >
         Run RR
+      </button>
+
+      <button 
+        onClick={runMLFQ}
+        style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", marginLeft: "10px" }}
+        disabled={processes.length === 0}
+      >
+        Run MLFQ
       </button>
 
       {processes.length > 0 && (
@@ -351,6 +445,32 @@ const App = () => {
           </thead>
           <tbody>
           {roundRobinResults.map((result) => (
+            <tr key={result.id}>
+              <td style={{ padding: "8px" }}>{result.id}</td>
+              <td style={{ padding: "8px" }}>{result.finishTime}</td>
+              <td style={{ padding: "8px" }}>{result.turnaroundTime}</td>
+              <td style={{ padding: "8px" }}>{result.waitingTime}</td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+
+    {mlfqResults.length > 0 && (
+      <div style={{ marginTop: "20px" }}>
+        <h2>MLFQ Scheduling Results</h2>
+        <table border="1" style={{ margin: "auto", borderCollapse: "collapse", width: "60%" }}>
+          <thead>
+            <tr>
+              <th style={{ padding: "8px" }}>Process ID</th>
+              <th style={{ padding: "8px" }}>Finish Time</th>
+              <th style={{ padding: "8px" }}>Turnaround Time</th>
+              <th style={{ padding: "8px" }}>Waiting Time</th>
+            </tr>
+          </thead>
+          <tbody>
+          {mlfqResults.map((result) => (
             <tr key={result.id}>
               <td style={{ padding: "8px" }}>{result.id}</td>
               <td style={{ padding: "8px" }}>{result.finishTime}</td>

@@ -10,19 +10,19 @@ function Header() {
 
 const styles = {
     header: {
-        background: "#FBA0E3",
-        color: "#000000",
+        background: "#e1eff0", // Header background black
+        color: "#507882", // Text white
         textAlign: "center",
         padding: "15px",
         position: "fixed",
         width: "100%",
         top: 0,
         zIndex: 1000,
+        fontFamily: "'Playfair Display', serif", // Apply Playfair Display font
     },
-
     title: {
         margin: "10px 0",
-        fontSize: "24px",
+        fontSize: "40px",
     },
 };
 

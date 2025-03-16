@@ -28,7 +28,7 @@ const Timer = ({ currentTime }) => {
             .attr("y", 25)
             .attr("text-anchor", "middle")
             .attr("font-size", "24px")
-            .attr("fill", "black")
+            .attr("fill", "#507882")
             .text(`Timer: ${currentTime}`);
     }, [currentTime]);  
     return <svg ref={timerRef}></svg>;

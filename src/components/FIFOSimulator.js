@@ -185,7 +185,7 @@ const styles = {
         margin: "10px",
     },
     generateButton: {
-        background: "#007BFF",
+        background: "#f0e9df",
         color: "white",
         fontSize: "16px",
         padding: "8px 16px",
@@ -195,7 +195,7 @@ const styles = {
         marginLeft: "10px",
     },
     button: {
-        background: "linear-gradient(135deg, #4CAF50, #2E8B57)",
+        background: "linear-gradient(135deg,#edd7c8, #edd7c8)",
         color: "white",
         fontSize: "18px",
         padding: "12px 24px",

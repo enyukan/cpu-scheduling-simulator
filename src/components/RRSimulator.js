@@ -88,7 +88,6 @@ const RoundRobinSimulator = () => {
             if (queue.length === 0) {
                 setIsRunning(false);
                 setTimeout(() => {
-                    setCurrentTime(0);
                     setExecutionProgress(0);
                 }, 500);
                 return;
@@ -113,7 +112,7 @@ const RoundRobinSimulator = () => {
                     // Record log for execution progress
                     setExecutionLogs((prevLogs) => [
                         ...prevLogs,
-                        `Time ${currentTime + 1}: Process ${process.id} executed (Remaining time: ${process.burstTime - 1})`,
+                        `Time ${executedTime}: Process ${process.id} executed (Remaining time: ${process.burstTime - 1})`,
                     ]);
 
                     executionTime--;
@@ -139,11 +138,55 @@ const RoundRobinSimulator = () => {
         pdf.save("RR_Execution_Logs.pdf");
     };
 
+    // Styles object
+    const styles = {
+        container: {
+            textAlign: "center",
+            marginTop: "10px",
+            marginBottom: "10px",
+        },
+        label: {
+            fontSize: "16px",
+            fontWeight: "bold",
+            marginBottom: "30px",
+        },
+        input: {
+            width: "60px",
+            fontSize: "16px",
+            padding: "5px",
+            margin: "10px",
+            marginBottom: "30px",
+        },
+        generateButton: {
+            background: "linear-gradient(135deg,#e1eff0, #e1eff0)",
+            color: "#507882",
+            fontSize: "18px",
+            padding: "12px 24px",
+            border: "none",
+            borderRadius: "30px",
+            cursor: "pointer",
+            transition: "all 0.3s ease-in-out",
+            marginTop: "15px",
+            marginRight: "10px",
+            marginLeft: "10px",
+        },
+        button: {
+            background: "linear-gradient(135deg,#e1eff0, #e1eff0)",
+            color: "#507882",
+            fontSize: "18px",
+            padding: "12px 24px",
+            border: "none",
+            borderRadius: "30px",
+            cursor: "pointer",
+            transition: "all 0.3s ease-in-out",
+            marginTop: "15px",
+            marginRight: "10px",
+            marginLeft: "10px",
+        },
+    };
+
     return (
         <div style={styles.container}>
-            <Timer currentTime={currentTime} />
-            <ChartContainer processes={processes} executionProgress={executionProgress} />
-
             <div>
                 <label style={styles.label}>Number of Processes: </label>
                 <input
@@ -154,70 +197,35 @@ const RoundRobinSimulator = () => {
                     onChange={(e) => setNumProcesses(Number(e.target.value))}
                     style={styles.input}
                 />
+
                 <label style={styles.label}>Time Quantum: </label>
-                <input
-                    type="number"
-                    min="1"
-                    max="5"
-                    value={timeQuantum}
-                    onChange={(e) => setTimeQuantum(Number(e.target.value))}
-                    style={styles.input}
-                />
+                    <input
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={timeQuantum}
+                        onChange={(e) => setTimeQuantum(Number(e.target.value))}
+                        style={styles.input}
+                    />
+
                 <button onClick={() => generateRandomProcesses(numProcesses)} style={styles.generateButton}>
                     Generate Processes
                 </button>
             </div>
 
+            <Timer currentTime={currentTime} />
+
+            <ChartContainer processes={processes} executionProgress={executionProgress} />
 
             <button onClick={saveLogsAsPDF} style={styles.button}>
-                Download Execution Logs as PDF
+                Download
             </button>
 
-
             <button onClick={startSimulation} disabled={isRunning} style={styles.button}>
-                Start Round Robin Simulation
+                Start
             </button>
         </div>
     );
-};
-
-const styles = {
-    container: {
-        textAlign: "center",
-        marginTop: "20px",
-    },
-    label: {
-        fontSize: "16px",
-        fontWeight: "bold",
-        marginRight: "10px",
-    },
-    input: {
-        width: "60px",
-        fontSize: "16px",
-        padding: "5px",
-        margin: "10px",
-    },
-    generateButton: {
-        background: "#007BFF",
-        color: "white",
-        fontSize: "16px",
-        padding: "8px 16px",
-        border: "none",
-        borderRadius: "5px",
-        cursor: "pointer",
-        marginLeft: "10px",
-    },
-    button: {
-        background: "linear-gradient(135deg, #4CAF50, #2E8B57)",
-        color: "white",
-        fontSize: "18px",
-        padding: "12px 24px",
-        border: "none",
-        borderRadius: "30px",
-        cursor: "pointer",
-        transition: "all 0.3s ease-in-out",
-        marginTop: "15px",
-    },
 };
 
 export default RoundRobinSimulator;

@@ -143,7 +143,7 @@ const SJFSimulator = () => {
                     // Record log for execution progress
                     setExecutionLogs((prevLogs) => [
                         ...prevLogs,
-                        `Time ${currentTime + 1}: Process ${process.id} executed (Remaining time: ${burstLeft})`,
+                        `Time ${executedTime}: Process ${process.id} executed (Remaining time: ${burstLeft})`,
                     ]);
 
                 }
@@ -173,17 +173,11 @@ const SJFSimulator = () => {
             pdf.text(log, 10, 20 + index * 5);
         });
 
-        pdf.save("SJF_Execution_Logs.pdf");
+        pdf.save("SJF_Logs.pdf");
     };
-
-
-
 
     return (
         <div style={styles.container}>
-            <Timer currentTime={currentTime} />
-            <ChartContainer processes={processes} executionProgress={executionProgress} />
-
             <div>
                 <label style={styles.label}>Number of Processes: </label>
                 <input
@@ -199,21 +193,17 @@ const SJFSimulator = () => {
                 </button>
             </div>
 
+            <Timer currentTime={currentTime} />
+
+            <ChartContainer processes={processes} executionProgress={executionProgress} />
 
             <button onClick={saveLogsAsPDF} style={styles.button}>
-                Download Execution Logs as PDF
+                Download
             </button>
 
-
-            <button
-                onClick={startSimulation}
-                disabled={isRunning}
-                style={styles.button}
-            >
-                Start SJF Simulation
+            <button onClick={startSimulation} disabled={isRunning} style={styles.button}>
+                Start
             </button>
-
-        
         </div>
     );
 };
@@ -221,31 +211,24 @@ const SJFSimulator = () => {
 const styles = {
     container: {
         textAlign: "center",
-        marginTop: "20px",
+        marginTop: "10px",
+        marginBottom: "10px",
     },
     label: {
         fontSize: "16px",
         fontWeight: "bold",
+        marginBottom: "30px",
     },
     input: {
         width: "60px",
         fontSize: "16px",
         padding: "5px",
         margin: "10px",
+        marginBottom: "30px",
     },
     generateButton: {
-        background: "#007BFF",
-        color: "white",
-        fontSize: "16px",
-        padding: "8px 16px",
-        border: "none",
-        borderRadius: "5px",
-        cursor: "pointer",
-        marginLeft: "10px",
-    },
-    button: {
-        background: "linear-gradient(135deg, #4CAF50, #2E8B57)",
-        color: "white",
+        background: "linear-gradient(135deg,#e1eff0, #e1eff0)",
+        color: "#507882",
         fontSize: "18px",
         padding: "12px 24px",
         border: "none",
@@ -253,7 +236,23 @@ const styles = {
         cursor: "pointer",
         transition: "all 0.3s ease-in-out",
         marginTop: "15px",
+        marginRight: "10px",
+        marginLeft: "10px",
+    },
+    button: {
+        background: "linear-gradient(135deg,#e1eff0, #e1eff0)",
+        color: "#507882",
+        fontSize: "18px",
+        padding: "12px 24px",
+        border: "none",
+        borderRadius: "30px",
+        cursor: "pointer",
+        transition: "all 0.3s ease-in-out",
+        marginTop: "15px",
+        marginRight: "10px",
+        marginLeft: "10px",
     },
 };
+
 
 export default SJFSimulator;

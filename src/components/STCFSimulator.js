@@ -9,11 +9,10 @@ const STCFSimulator = () => {
     const [executionProgress, setExecutionProgress] = useState(0);
     const [numProcesses, setNumProcesses] = useState(3);
     const [processes, setProcesses] = useState([]);
-    const [executionLogs, setExecutionLogs] = useState([]); // ✅ 실행 과정 로그 저장
+    const [executionLogs, setExecutionLogs] = useState([]); 
 
     const colorMap = useRef({});
     const availableColors = ["#F4D1D6", "#D8A8C3", "#E4B9D9", "#A0B8B1", "#E1C7B0", "#D4D7E1", "#F1E1A6", "#F2C9A1", "#D4A79E", "#A3C9B2"];
-
     //Color mapping
     const getColorForProcess = (id) => {
         if (!colorMap.current[id]) {
@@ -22,7 +21,6 @@ const STCFSimulator = () => {
         return colorMap.current[id];
     };
 
-    
 
     // Generate random processes
     const generateRandomProcesses = (count) => {
@@ -103,7 +101,7 @@ const STCFSimulator = () => {
                 // Record log for execution progress
                 setExecutionLogs((prevLogs) => [
                     ...prevLogs,
-                    `Time ${time}: Process ${shortestJob.id} executed (Remaining time: ${shortestJob.remainingTime})`,
+                    `Time ${executedTime}: Process ${shortestJob.id} executed (Remaining time: ${shortestJob.remainingTime})`,
                 ]);
 
                 if (shortestJob.remainingTime > 0) {
@@ -129,15 +127,12 @@ const STCFSimulator = () => {
             pdf.text(log, 10, 20 + index * 5);
         });
 
-        pdf.save("STCF_Execution_Logs.pdf");
+        pdf.save("STCF_Logs.pdf");
     };
 
     return (
         <div style={styles.container}>
-            <Timer currentTime={currentTime} />
-            <ChartContainer processes={processes} executionProgress={executionProgress} />
-
-            <div style={styles.controls}>
+            <div>
                 <label style={styles.label}>Number of Processes: </label>
                 <input
                     type="number"
@@ -152,25 +147,66 @@ const STCFSimulator = () => {
                 </button>
             </div>
 
+            <Timer currentTime={currentTime} />
+
+            <ChartContainer processes={processes} executionProgress={executionProgress} />
+
             <button onClick={saveLogsAsPDF} style={styles.button}>
-                Download Execution Logs as PDF
+                Download
             </button>
 
             <button onClick={startSimulation} disabled={isRunning} style={styles.button}>
-                Start STCF Simulation
+                Start
             </button>
-
         </div>
     );
 };
 
 const styles = {
-    container: { textAlign: "center", marginTop: "20px" },
-    controls: { display: "flex", justifyContent: "center", alignItems: "center", marginTop: "15px", gap: "10px" },
-    label: { fontSize: "16px", fontWeight: "bold" },
-    input: { width: "60px", fontSize: "16px", padding: "5px", textAlign: "center" },
-    generateButton: { background: "#007BFF", color: "white", padding: "8px 16px", border: "none", borderRadius: "5px", cursor: "pointer", marginLeft: "10px" },
-    button: { background: "linear-gradient(135deg, #4CAF50, #2E8B57)", color: "white", fontSize: "18px", padding: "12px 24px", border: "none", borderRadius: "30px", cursor: "pointer", marginTop: "15px", transition: "all 0.3s ease-in-out" },
+    container: {
+        textAlign: "center",
+        marginTop: "10px",
+        marginBottom: "10px",
+    },
+    label: {
+        fontSize: "16px",
+        fontWeight: "bold",
+        marginBottom: "30px",
+    },
+    input: {
+        width: "60px",
+        fontSize: "16px",
+        padding: "5px",
+        margin: "10px",
+        marginBottom: "30px",
+    },
+    generateButton: {
+        background: "linear-gradient(135deg,#e1eff0, #e1eff0)",
+        color: "#507882",
+        fontSize: "18px",
+        padding: "12px 24px",
+        border: "none",
+        borderRadius: "30px",
+        cursor: "pointer",
+        transition: "all 0.3s ease-in-out",
+        marginTop: "15px",
+        marginRight: "10px",
+        marginLeft: "10px",
+    },
+    button: {
+        background: "linear-gradient(135deg,#e1eff0, #e1eff0)",
+        color: "#507882",
+        fontSize: "18px",
+        padding: "12px 24px",
+        border: "none",
+        borderRadius: "30px",
+        cursor: "pointer",
+        transition: "all 0.3s ease-in-out",
+        marginTop: "15px",
+        marginRight: "10px",
+        marginLeft: "10px",
+    },
 };
+
 
 export default STCFSimulator;

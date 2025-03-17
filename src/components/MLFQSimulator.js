@@ -202,8 +202,8 @@ const MLFQSimulator = () => {
                         key={q}
                         style={{
                             ...styles.queue,
-                            borderColor: currentQueue === q ? "green" : "black",
-                            backgroundColor: currentQueue === q ? "#e0ffe0" : "white",
+                            borderColor: currentQueue === q ? "#e1eff0" : "#edd7c8",
+                            backgroundColor: currentQueue === q ? "#e1eff0" : "#edd7c8",
                         }}
                     >
                         <h3>{q} {currentQueue === q ? "(Running)" : ""}</h3>

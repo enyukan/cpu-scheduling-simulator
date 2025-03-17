@@ -216,13 +216,15 @@ const MLFQSimulator = () => {
                 ))}
             </div>
 
+            <button onClick={downloadLogs} disabled={isRunning} style={styles.button}>
+                Download 
+            </button>
+
             <button onClick={startSimulation} disabled={isRunning} style={styles.button}>
                 Start
             </button>
 
-            <button onClick={downloadLogs} disabled={isRunning} style={styles.button}>
-                Download Logs as PDF
-            </button>
+            
         </div>
     );
 };

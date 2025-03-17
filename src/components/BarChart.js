@@ -54,6 +54,7 @@ const BarChart = ({ processes = [] }) => {
                         x: {
                             title: { 
                                 display: true, 
+                                // we are assuming each process comes in 1 second later than the one next to it
                                 text: "Processes", 
                                 font: {
                                     size: 14,

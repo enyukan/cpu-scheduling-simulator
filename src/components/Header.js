@@ -13,7 +13,7 @@ const styles = {
         background: "#e1eff0", // Header background black
         color: "#507882", // Text white
         textAlign: "center",
-        padding: "15px",
+        padding: "30px",
         position: "fixed",
         width: "100%",
         top: 0,

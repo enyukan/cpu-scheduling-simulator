@@ -1,31 +1,29 @@
 import React, { useEffect, useRef } from "react";
 import { Chart, registerables } from "chart.js";
 
-
-//Register to use modules in charts
+// Register to use modules in charts
 Chart.register(...registerables);
 
-//Bar Chart Component (We need processes info)
+// Bar Chart Component (We need processes info)
 const BarChart = ({ processes = [] }) => {
 
     // Space for drawing chart
     const chartRef = useRef(null);
 
-    //Chart object
+    // Chart object
     const chartInstance = useRef(null);
 
-
-    //Execute the following code every time 'processes' changes
+    // Execute the following code every time 'processes' changes
     useEffect(() => {
 
         if (!chartRef.current) return;
 
-        //drawing tool
+        // Drawing tool
         const ctx = chartRef.current.getContext("2d");
 
         if (!chartInstance.current) {
 
-            //Draw initial chart
+            // Draw initial chart
             chartInstance.current = new Chart(ctx, {
 
                 type: "bar",
@@ -33,17 +31,15 @@ const BarChart = ({ processes = [] }) => {
                 data: {
                     labels: processes.map((p) => p.id),
 
-
                     datasets: [
                         {
-                            label: "Burst Time",
+                            label: "CPU Burst Time (s)",
                             data: processes.map((p) => p.burstTime),
                             backgroundColor: processes.map((p) => p.color),
                             borderWidth: 1,
                         },
                     ],
                 },
-
 
                 options: {
                     responsive: true,
@@ -54,18 +50,42 @@ const BarChart = ({ processes = [] }) => {
                         easing: "easeInOutCubic",
                     },
 
-
                     scales: {
                         x: {
-                            title: { display: true, text: "Arrival" },
+                            title: { 
+                                display: true, 
+                                text: "Processes", 
+                                font: {
+                                    size: 14,
+                                    family: "'Playfair Display', serif"
+                                },
+                            },
+                            ticks: {
+                                font: {
+                                    size: 14,
+                                    family: "'Playfair Display', serif"
+                                },
+                            },
                         },
                         y: {
                             beginAtZero: true,
                             max: Math.max(...processes.map((p) => p.initialBurst), 10),
-                            title: { display: true, text: "Burst Time" },
+                            title: { 
+                                display: true, 
+                                text: "CPU Burst Time (s)", 
+                                font: {
+                                    size: 14,
+                                    family: "'Playfair Display', serif"
+                                },
+                            },
+                            ticks: {
+                                font: {
+                                    size: 14,
+                                    family: "'Playfair Display', serif"
+                                },
+                            },
                         },
                     },
-
 
                     plugins: {
                         legend: { display: false },
@@ -73,8 +93,6 @@ const BarChart = ({ processes = [] }) => {
                     },
 
                 },
-
-
 
                 plugins: [
                     {
@@ -88,10 +106,9 @@ const BarChart = ({ processes = [] }) => {
                                 meta.data.forEach((bar, index) => {
                                     const value = dataset.data[index];
 
-
                                     if (value > 0) {
-                                        ctx.fillStyle = "#000";
-                                        ctx.font = "bold 14px Arial";
+                                        ctx.fillStyle = "#507882";
+                                        ctx.font = "14px 'Playfair Display', serif";
                                         ctx.textAlign = "center";
                                         ctx.fillText(value, bar.x, bar.y - 10);
                                     }
@@ -99,12 +116,7 @@ const BarChart = ({ processes = [] }) => {
                             });
                             ctx.restore();
                         },
-
-
-
                     },
-
-                    
                 ],
             });
         } else {

@@ -1,49 +1,42 @@
 import { Chart, registerables } from "chart.js";
 import React, { useEffect, useRef } from "react";
 
-
-//Register to use modules in charts
+// Register to use modules in charts
 Chart.register(...registerables);
 
-
-//Pie Chart Component (We need info about 'processes', 'executionProgress' to draw or update the chart)
+// Pie Chart Component (We need info about 'processes', 'executionProgress' to draw or update the chart)
 const PieChart = ({ processes, executionProgress }) => {
 
     // Space for drawing chart
     const chartRef = useRef(null);
 
-    //Chart object
+    // Chart object
     const chartInstance = useRef(null);
 
-    //Execute the following code every time the value of processes or executionProgresses changes
+    // Execute the following code every time the value of processes or executionProgress changes
     useEffect(() => {
-
 
         if (!chartRef.current) return;
 
-        //ctx is like pencil. We are going to draw chart with the obj 'ctx'
+        // ctx is like pencil. We are going to draw chart with the obj 'ctx'
         const ctx = chartRef.current.getContext("2d");
 
-
-        //Calculate total burst time for all processes.
-        //p -> each element in 'processes'
-        //reduce -> short version of for loop
+        // Calculate total burst time for all processes
         const totalBurst = processes.reduce((acc, p) => acc + p.initialBurst, 0);
 
-        //Convert the execution progress of each process to percentage (Array)
+        // Convert the execution progress of each process to percentage (Array)
         let executedPercentages = processes.map((p) => ((p.initialBurst - p.burstTime) / totalBurst) * 100);
 
         // Total cumulative progress
         const executedSum = executedPercentages.reduce((acc, val) => acc + val, 0);
 
-        //Current run rate for each process
+        // Current run rate for each process
         executedPercentages.push(100 - executedSum);
 
-        //Color each process.       (Remaining part -> gray(#D3D3D3))
+        // Color each process (Remaining part -> gray(#D3D3D3))
         const colors = [...processes.map((p) => p.color), "#D3D3D3"]; 
 
-
-        //If there is no chart
+        // If there is no chart
         if (!chartInstance.current) {
 
             // Draw Initial Chart
@@ -51,18 +44,16 @@ const PieChart = ({ processes, executionProgress }) => {
 
                 type: "doughnut",
 
-
                 data: {
                     labels: [...processes.map((p) => p.id), "Remaining"],
 
                     datasets: [
                         {
                             data: executedPercentages,
-                            backgroundColor: colors, // ✅ 여기에서 배열을 새로 할당
+                            backgroundColor: colors,
                         },
                     ],
                 },
-
 
                 options: {
                     responsive: true,
@@ -77,16 +68,16 @@ const PieChart = ({ processes, executionProgress }) => {
                         title: {
                             display: true,
                             text: "Progress (%)",
-                            font: { size: 16, weight: "bold" },
+                            font: { size: 18, weight: "bold", family: "'Playfair Display', serif" },
                             padding: { top: 10, bottom: 10 },
                         },
 
-
                         legend: {
-                            labels:{
+                            labels: {
                                 filter: (legendItem, chartData) => {
                                     return legendItem.text !== "Remaining";
                                 },
+                                font: { size: 18, family: "'Playfair Display', serif" },
                             },
                         },
                     },

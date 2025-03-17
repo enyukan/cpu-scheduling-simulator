@@ -12,7 +12,7 @@ const STCFSimulator = () => {
     const [executionLogs, setExecutionLogs] = useState([]); // ✅ 실행 과정 로그 저장
 
     const colorMap = useRef({});
-    const availableColors = ["red", "blue", "green", "orange", "purple", "cyan", "pink", "brown", "lime", "magenta"];
+    const availableColors = ["#F4D1D6", "#D8A8C3", "#E4B9D9", "#A0B8B1", "#E1C7B0", "#D4D7E1", "#F1E1A6", "#F2C9A1", "#D4A79E", "#A3C9B2"];
 
     //Color mapping
     const getColorForProcess = (id) => {

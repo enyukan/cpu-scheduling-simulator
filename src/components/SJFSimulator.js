@@ -70,99 +70,79 @@ const SJFSimulator = () => {
         setProcesses(newProcesses);
         setExecutionLogs([]); 
     };
-
-
-
+    
     //Start SJF simulation
     const startSimulation = () => {
         if (isRunning) return;
         setIsRunning(true);
-        setCurrentTime(0);
         setExecutionProgress(0);
         setExecutionLogs([]); 
         runSJF();
     };
 
-
-
     const runSJF = () => {
-        let totalBurst = processes.reduce((acc,p) => acc + p.burstTime, 0);
+        let totalBurst = processes.reduce((acc, p) => acc + p.burstTime, 0); // Total burst time for progress calculation
         let executedTime = 0;
-
-
-
-        //Create a process order list to execute        (just copy elements from 'processes' for now)
-        let queue = [...processes];
-
-
-
-        //Recursive function -> Select the process to execute and run it
-        const executeProcess = () =>{
-
-            //Check if all processes are executed
-            if(queue.length === 0){
-                setIsRunning(false);
-                setTimeout(() => {
-
-                    //Initialize timer, progress after 0.5sec
-                    setCurrentTime(0);
-                    setExecutionProgress(0);
-                }, 500);
+        let currentTime = 0; // Track the current simulation time
+        let queue = [...processes]; // Queue to hold processes
+    
+        // Recursive function to execute processes
+        const executeProcess = () => {
+            // Filter out processes that have not arrived yet
+            let availableProcesses = queue.filter(p => p.arrival <= currentTime);
+    
+            // If there are no processes ready to execute, wait for 1 second
+            if (availableProcesses.length === 0) {
+                setTimeout(executeProcess, 500); // Check again in 1 second
                 return;
             }
-
-
-
-            //Determine execution order
-            queue.sort((a,b) => a.burstTime - b.burstTime);
-
-
-            //shift?        ->          take the first element from the sorted queue
-            let process = queue.shift();
-
-
+    
+            // Sort available processes by burst time (Shortest Job First)
+            availableProcesses.sort((a, b) => a.burstTime - b.burstTime);
+    
+            // Select the first process (shortest burst time)
+            let process = availableProcesses[0];
             let burstLeft = process.burstTime;
-
-
+    
+            // Remove the selected process from the queue
+            queue = queue.filter(p => p.id !== process.id);
+    
+            // Log the execution of the selected process
             const interval = setInterval(() => {
-
-
-                //Check if current process is fully executed
-                if(burstLeft > 0) {
-                    setCurrentTime((prev) => prev + 1);
+                if (burstLeft > 0) {
+                    // Decrease the burst time of the current process
                     burstLeft--;
                     executedTime++;
-
+                    currentTime++;
+    
+                    // Update UI states
                     setExecutionProgress((executedTime / totalBurst) * 100);
-
+                    setCurrentTime(currentTime);
+    
+                    // Update process burst time in the state
                     setProcesses((prevProcesses) =>
                         prevProcesses.map((p) =>
-                            p.id === process.id ? {...p, burstTime:burstLeft, color:p.color}: p)
+                            p.id === process.id ? { ...p, burstTime: burstLeft, color: p.color } : p
+                        )
                     );
-
-                    // Record log for execution progress
+    
+                    // Log the execution progress
                     setExecutionLogs((prevLogs) => [
                         ...prevLogs,
-                        `Time ${executedTime}: Process ${process.id} executed (Remaining time: ${burstLeft})`,
+                        `Time ${currentTime}: Process ${process.id} executed (Remaining time: ${burstLeft})`,
                     ]);
-
-                }
-
-
-                //Run the next process
-                else {
+                } else {
+                    // Once process finishes, move on to the next process
                     clearInterval(interval);
-                    executeProcess();
+                    executeProcess(); // Recursively call to execute the next process
                 }
-
-
-            }, 500);
+            }, 500); // Process runs every second
         };
-
-
+    
         executeProcess();
     };
-
+    
+    
 
     // Save execution process log as pdf
     const saveLogsAsPDF = () => {

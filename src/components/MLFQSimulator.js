@@ -79,7 +79,6 @@ const MLFQSimulator = () => {
         let processExecutionCount = {};
 
         const executeProcess = async () => {
-
             // Executes as long as at least one process exists in any queue
             while (queue0.length > 0 || queue1.length > 0 || queue2.length > 0) {
                 let currentProcess = null;
@@ -92,13 +91,13 @@ const MLFQSimulator = () => {
                     quantum = timeQuantum.q0;
                     runningQueue = "Q0";
                 }
-                // If there is a process in queue1, take a process from queue0 and put it into runningQueue
+                // If there is a process in queue1, take a process from queue1 and put it into runningQueue
                 else if (queue1.length > 0) {
                     currentProcess = queue1.shift();
                     quantum = timeQuantum.q1;
                     runningQueue = "Q1";
                 } 
-                // If there is a process in queue2, take a process from queue0 and put it into runningQueue
+                // If there is a process in queue2, take a process from queue2 and put it into runningQueue
                 else if (queue2.length > 0) {
                     currentProcess = queue2.shift();
                     quantum = timeQuantum.q2;
@@ -110,7 +109,6 @@ const MLFQSimulator = () => {
 
                 // Run process
                 if (currentProcess) {
-
                     // Save the number of runs of each process
                     processExecutionCount[currentProcess.id] = (processExecutionCount[currentProcess.id] || 0) + quantum;
 
@@ -134,28 +132,22 @@ const MLFQSimulator = () => {
                                 p.id === currentProcess.id ? { ...p, burstTime: currentProcess.burstTime } : p
                             )
                         );
+
+                        // Log every second of execution
+                        const log = `Time ${executedTime}: Process ${currentProcess.id} executed (Remaining time: ${currentProcess.burstTime})`;
+                        setExecutionLogs((prevLogs) => [...prevLogs, log]);
                     }
 
-                    // Update execution logs with the correct time
-                    const log = `Time ${executedTime}: Process ${currentProcess.id} executed (Remaining time: ${currentProcess.burstTime})`;
-                    setExecutionLogs((prevLogs) => [...prevLogs, log]);
-
-                    // If the process is not finished yet
+                    // Priority Boosting logic and queue movements
                     if (currentProcess.burstTime > 0) {
-                        // Priority Boosting logic
                         if (processExecutionCount[currentProcess.id] >= priorityBoostThreshold) {
                             queue0.push(currentProcess);
                             processExecutionCount[currentProcess.id] = 0;
-                        } 
-                        // Move process in Q0 to Q1
-                        else if (quantum === timeQuantum.q0) {
+                        } else if (quantum === timeQuantum.q0) {
                             queue1.push(currentProcess);
-                        } 
-                        // Move process in Q1 to Q2
-                        else if (quantum === timeQuantum.q1) {
+                        } else if (quantum === timeQuantum.q1) {
                             queue2.push(currentProcess);
-                        } 
-                        else {
+                        } else {
                             queue2.push(currentProcess);
                         }
                     }

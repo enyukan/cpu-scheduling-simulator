@@ -1,34 +1,19 @@
-import React, { useEffect, useState, useRef } from "react";
-import ChartContainer from "./ChartContainer";
+import React, { useState, useEffect, useRef } from "react";
+import ChartContainer from "./Charts";
 import Timer from "./Timer";
 import jsPDF from "jspdf";
 
-// Define Functional Component
-const FIFOSimulator = () => {
-
-    // Check if the simulation is running or not
+const SJF = () => {
     const [isRunning, setIsRunning] = useState(false);
-
-    // Current Time
     const [currentTime, setCurrentTime] = useState(0);
-
-    // Overall Run Progress
     const [executionProgress, setExecutionProgress] = useState(0);
-
-    // Number of processes to create (at least 3 processes)
     const [numProcesses, setNumProcesses] = useState(3);
-
-    // Array that store a list of processes to run
     const [processes, setProcesses] = useState([]);
-
-    // Execution logs for PDF saving
     const [executionLogs, setExecutionLogs] = useState([]);
 
-    // Mapping process-specific colors
     const colorMap = useRef({});
     const availableColors = ["#F4D1D6", "#D8A8C3", "#E4B9D9", "#A0B8B1", "#E1C7B0", "#D4D7E1", "#F1E1A6", "#F2C9A1", "#D4A79E", "#A3C9B2"];
 
-    // A function that specifies a color according to the process ID
     const getColorForProcess = (id) => {
         if (!colorMap.current[id]) {
             colorMap.current[id] = availableColors[Object.keys(colorMap.current).length % availableColors.length];
@@ -36,96 +21,83 @@ const FIFOSimulator = () => {
         return colorMap.current[id];
     };
 
-    // Generate random process
-    const generateRandomProcesses = (count) => {
-        let newProcesses = Array.from({ length: count }, (_, i) => {
-            const processId = `P${i + 1}`;
+    const generateProcesses = (count) => {
+        let newProcesses = Array.from({ length: count }, (_, i) => ({
+            id: `P${i + 1}`,
+            arrival: Math.floor(Math.random() * 6),
+            burstTime: Math.floor(Math.random() * 6) + 2,
+            initialBurst: 0,
+            color: getColorForProcess(`P${i + 1}`),
+        }));
 
-            // Set arrival, burstTime randomly
-            return {
-                id: processId,
-                arrival: Math.floor(Math.random() * 6),
-                burstTime: Math.floor(Math.random() * 6) + 2,
-                initialBurst: 0,
-                color: getColorForProcess(processId),
-            };
-        });
-
-        // Sort in ascending order based on arrival time
-        newProcesses = newProcesses.sort((a, b) => a.arrival - b.arrival);
-
-        // Save the initial burstTime separately to remember the initial execution order even during execution
+        newProcesses.sort((a, b) => a.arrival - b.arrival);
         newProcesses = newProcesses.map((p) => ({ ...p, initialBurst: p.burstTime }));
 
         setProcesses(newProcesses);
-        setExecutionLogs([]); 
+        setExecutionProgress(0);
+        setExecutionLogs([]);
     };
 
-    // Start FIFO simulation
-    const startSimulation = () => {
+    const startSim = () => {
         if (isRunning) return;
         setIsRunning(true);
         setCurrentTime(0);
         setExecutionProgress(0);
         setExecutionLogs([]);
-        runFIFO();
-    };
 
-    const runFIFO = () => {
-        
-        let totalBurst = processes.reduce((acc, p) => acc + p.burstTime, 0);
+        let processList = [...processes].map((p) => ({ ...p, remainingTime: p.burstTime }));
         let executedTime = 0;
+        let time = 0;
 
-        const executeProcess = (index) => {
-            if (index >= processes.length) {
-                setIsRunning(false);
-                setTimeout(() => {
-                    setExecutionProgress(0);
-                }, 500);
-                return;
+        let readyQueue = [];
+        let executionQueue = [];
+
+        const interval = setInterval(() => {
+            if (processList.length > 0) {
+                let nextProcess = processList.shift();
+                readyQueue.push(nextProcess);
             }
 
-            const process = processes[index];
-            let burstLeft = process.burstTime;
+            if (readyQueue.length > 0) {
+                readyQueue.sort((a, b) => a.burstTime - b.burstTime || a.arrival - b.arrival);
+                let shortestJob = readyQueue.shift();
+                executionQueue.push(shortestJob);
 
-            const interval = setInterval(() => {
-                if (burstLeft > 0) {
-                    setCurrentTime((prev) => prev + 1); // Use functional update to increment time
-                    burstLeft--;
-                    executedTime++;
+                shortestJob.remainingTime -= 1;
+                executedTime++;
+                time++;
 
-                    setExecutionProgress((executedTime / totalBurst) * 100);
+                const totalBurst = processes.reduce((acc, p) => acc + p.initialBurst, 0);
+                setExecutionProgress((executedTime / totalBurst) * 100);
+                setProcesses((prevProcesses) =>
+                    prevProcesses.map((p) => (p.id === shortestJob.id ? { ...p, burstTime: shortestJob.remainingTime } : p))
+                );
+                setCurrentTime(time);
 
-                    setProcesses((prevProcesses) =>
-                        prevProcesses.map((p) =>
-                            p.id === process.id ? { ...p, burstTime: burstLeft, color: p.color } : p
-                        )
-                    );
-                    // Record log for execution progress
-                    setExecutionLogs((prevLogs) => [
-                        ...prevLogs,
-                        `Time ${executedTime}: Process ${process.id} executed (Remaining time: ${burstLeft})`,
-                    ]);
-                } else {
-                    clearInterval(interval);
-                    executeProcess(index + 1);
+                setExecutionLogs((prevLogs) => [
+                    ...prevLogs,
+                    `Time ${executedTime}: Process ${shortestJob.id} executed (Remaining time: ${shortestJob.remainingTime})`,
+                ]);
+
+                if (shortestJob.remainingTime > 0) {
+                    readyQueue.push(shortestJob);
                 }
-            }, 500); // Changed from 500ms to 1000ms (1 second)
-        };
+            }
 
-        executeProcess(0);
+            if (readyQueue.length === 0 && processList.length === 0) {
+                clearInterval(interval);
+                setIsRunning(false);
+            }
+        }, 1000);
     };
 
-    // Save execution log as pdf
     const saveLogsAsPDF = () => {
         const pdf = new jsPDF();
-        pdf.text("FIFO Scheduling Execution Logs", 10, 10);
-
+        pdf.text("SJF Scheduling Logs", 10, 10);
         executionLogs.forEach((log, index) => {
             pdf.text(log, 10, 20 + index * 5);
         });
-
-        pdf.save("FIFO_Logs.pdf");
+        pdf.save("SJF_Logs.pdf");
     };
 
     return (
@@ -140,20 +112,19 @@ const FIFOSimulator = () => {
                     onChange={(e) => setNumProcesses(Number(e.target.value))}
                     style={styles.input}
                 />
-                <button onClick={() => generateRandomProcesses(numProcesses)} style={styles.generateButton}>
+                <button onClick={() => generateProcesses(numProcesses)} style={styles.generateButton}>
                     Generate Processes
                 </button>
             </div>
 
             <Timer currentTime={currentTime} />
-
             <ChartContainer processes={processes} executionProgress={executionProgress} />
 
             <button onClick={saveLogsAsPDF} style={styles.button}>
                 Download
             </button>
 
-            <button onClick={startSimulation} disabled={isRunning} style={styles.button}>
+            <button onClick={startSim} disabled={isRunning} style={styles.button}>
                 Start
             </button>
         </div>
@@ -206,4 +177,4 @@ const styles = {
     },
 };
 
-export default FIFOSimulator;
+export default SJF;

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import ChartContainer from "./ChartContainer";
+import ChartContainer from "./Charts";
 import Timer from "./Timer";
 import jsPDF from "jspdf";
 
-const STCFSimulator = () => {
+const STCF = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [executionProgress, setExecutionProgress] = useState(0);
@@ -13,7 +13,7 @@ const STCFSimulator = () => {
 
     const colorMap = useRef({});
     const availableColors = ["#F4D1D6", "#D8A8C3", "#E4B9D9", "#A0B8B1", "#E1C7B0", "#D4D7E1", "#F1E1A6", "#F2C9A1", "#D4A79E", "#A3C9B2"];
-    //Color mapping
+
     const getColorForProcess = (id) => {
         if (!colorMap.current[id]) {
             colorMap.current[id] = availableColors[Object.keys(colorMap.current).length % availableColors.length];
@@ -21,9 +21,7 @@ const STCFSimulator = () => {
         return colorMap.current[id];
     };
 
-
-    // Generate random processes
-    const generateRandomProcesses = (count) => {
+    const generateProcesses = (count) => {
         let newProcesses = Array.from({ length: count }, (_, i) => ({
             id: `P${i + 1}`,
             arrival: Math.floor(Math.random() * 6),
@@ -32,11 +30,7 @@ const STCFSimulator = () => {
             color: getColorForProcess(`P${i + 1}`),
         }));
 
-
-        // Align processes in arrival order
         newProcesses.sort((a, b) => a.arrival - b.arrival);
-
-        // Save initial burstTime of each process
         newProcesses = newProcesses.map((p) => ({ ...p, initialBurst: p.burstTime }));
 
         setProcesses(newProcesses);
@@ -44,45 +38,28 @@ const STCFSimulator = () => {
         setExecutionLogs([]);
     };
 
-    
-    const startSimulation = () => {
+    const startSim = () => {
         if (isRunning) return;
         setIsRunning(true);
         setCurrentTime(0);
         setExecutionProgress(0);
         setExecutionLogs([]);
 
-
-        //Copy list of processes. add remainingTime property
-        let processList = [...processes].map((p) => ({
-            ...p, remainingTime: p.burstTime,
-        }));
-
+        let processList = [...processes].map((p) => ({ ...p, remainingTime: p.burstTime }));
         let executedTime = 0;
         let time = 0;
-
 
         let readyQueue = [];
         let executionQueue = [];
 
-
-        //Repeated execution function that runs a particular task every second
         const interval = setInterval(() => {
-
-            // If a process remains in the list of processes that haven't been executed.
-            //Pull the process at the beginning of the process list and add it to the readyQueue
             if (processList.length > 0) {
                 let nextProcess = processList.shift();
                 readyQueue.push(nextProcess);
             }
 
-            // Add process that has shortest burstTime into executionQueue
             if (readyQueue.length > 0) {
-                readyQueue.sort((a, b) => {
-                    if (a.remainingTime !== b.remainingTime) return a.remainingTime - b.remainingTime;
-                    return a.arrival - b.arrival;
-                });
-
+                readyQueue.sort((a, b) => a.remainingTime - b.remainingTime || a.arrival - b.arrival);
                 let shortestJob = readyQueue.shift();
                 executionQueue.push(shortestJob);
 
@@ -90,7 +67,6 @@ const STCFSimulator = () => {
                 executedTime++;
                 time++;
 
-                //update execution progress
                 const totalBurst = processes.reduce((acc, p) => acc + p.initialBurst, 0);
                 setExecutionProgress((executedTime / totalBurst) * 100);
                 setProcesses((prevProcesses) =>
@@ -98,7 +74,6 @@ const STCFSimulator = () => {
                 );
                 setCurrentTime(time);
 
-                // Record log for execution progress
                 setExecutionLogs((prevLogs) => [
                     ...prevLogs,
                     `Time ${executedTime}: Process ${shortestJob.id} executed (Remaining time: ${shortestJob.remainingTime})`,
@@ -109,7 +84,6 @@ const STCFSimulator = () => {
                 }
             }
 
-            // Terminate if all process are executed
             if (readyQueue.length === 0 && processList.length === 0) {
                 clearInterval(interval);
                 setIsRunning(false);
@@ -118,15 +92,12 @@ const STCFSimulator = () => {
         }, 1000);
     };
 
-    // Save execution log as pdf
     const saveLogsAsPDF = () => {
         const pdf = new jsPDF();
-        pdf.text("STCF Scheduling Execution Logs", 10, 10);
-        
+        pdf.text("STCF Scheduling Logs", 10, 10);
         executionLogs.forEach((log, index) => {
             pdf.text(log, 10, 20 + index * 5);
         });
-
         pdf.save("STCF_Logs.pdf");
     };
 
@@ -142,20 +113,19 @@ const STCFSimulator = () => {
                     onChange={(e) => setNumProcesses(Number(e.target.value))}
                     style={styles.input}
                 />
-                <button onClick={() => generateRandomProcesses(numProcesses)} style={styles.generateButton}>
+                <button onClick={() => generateProcesses(numProcesses)} style={styles.generateButton}>
                     Generate Processes
                 </button>
             </div>
 
             <Timer currentTime={currentTime} />
-
             <ChartContainer processes={processes} executionProgress={executionProgress} />
 
             <button onClick={saveLogsAsPDF} style={styles.button}>
                 Download
             </button>
 
-            <button onClick={startSimulation} disabled={isRunning} style={styles.button}>
+            <button onClick={startSim} disabled={isRunning} style={styles.button}>
                 Start
             </button>
         </div>
@@ -208,5 +178,4 @@ const styles = {
     },
 };
 
-
-export default STCFSimulator;
+export default STCF;

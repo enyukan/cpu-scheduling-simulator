@@ -1,16 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
-import ChartContainer from "./ChartContainer";
+import ChartContainer from "./Charts";
 import Timer from "./Timer";
 import jsPDF from "jspdf";
 
-const RoundRobinSimulator = () => {
+const RR = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
-    const [executionProgress, setExecutionProgress] = useState(0);
+    const [execProgress, setExecProgress] = useState(0);
     const [numProcesses, setNumProcesses] = useState(3);
     const [timeQuantum, setTimeQuantum] = useState(2);
     const [processes, setProcesses] = useState([]);
-    const [executionLogs, setExecutionLogs] = useState([]);
+    const [execLogs, setExecLogs] = useState([]);
 
     const colorMap = useRef({});
     const availableColors = ["#F4D1D6", "#D8A8C3", "#E4B9D9", "#A0B8B1", "#E1C7B0", "#D4D7E1", "#F1E1A6", "#F2C9A1", "#D4A79E", "#A3C9B2"];
@@ -42,11 +42,11 @@ const RoundRobinSimulator = () => {
         newProcesses = newProcesses.map((p) => ({ ...p, initialBurst: p.burstTime }));
 
         setProcesses(newProcesses);
-        setExecutionLogs([]);
+        setExecLogs([]); // Reset logs
     };
 
-    // Create a queue for execution list (in arrival order).     We need processes and quantum
-    const generateExecutionQueue = (processes, timeQuantum) => {
+    // Create a queue for execution list (in arrival order). We need processes and quantum
+    const generateExecQueue = (processes, timeQuantum) => {
         let queue = [];
         let remainingBursts = processes.map((p) => ({
             id: p.id,
@@ -58,9 +58,9 @@ const RoundRobinSimulator = () => {
                 let process = remainingBursts[i];
 
                 if (process.burstTime > 0) {
-                    let executionTime = Math.min(timeQuantum, process.burstTime);
-                    queue.push({ ...process, executionTime });
-                    process.burstTime -= executionTime;
+                    let execTime = Math.min(timeQuantum, process.burstTime);
+                    queue.push({ ...process, execTime });
+                    process.burstTime -= execTime;
                 }
             }
         }
@@ -73,14 +73,14 @@ const RoundRobinSimulator = () => {
         if (isRunning) return;
         setIsRunning(true);
         setCurrentTime(0);
-        setExecutionProgress(0);
-        setExecutionLogs([]); 
+        setExecProgress(0);
+        setExecLogs([]); // Clear previous logs
         runRoundRobin();
     };
 
     // Run RR Scheduling
     const runRoundRobin = () => {
-        let queue = generateExecutionQueue(processes, timeQuantum);
+        let queue = generateExecQueue(processes, timeQuantum);
         let totalBurst = processes.reduce((acc, p) => acc + p.burstTime, 0);
         let executedTime = 0;
 
@@ -88,20 +88,20 @@ const RoundRobinSimulator = () => {
             if (queue.length === 0) {
                 setIsRunning(false);
                 setTimeout(() => {
-                    setExecutionProgress(0);
+                    setExecProgress(0);
                 }, 500);
                 return;
             }
 
             let process = queue.shift();
-            let executionTime = process.executionTime;
-            
+            let execTime = process.execTime;
+
             const interval = setInterval(() => {
-                if (executionTime > 0) {
+                if (execTime > 0) {
                     setCurrentTime((prev) => prev + 1);
                     executedTime++;
 
-                    setExecutionProgress((executedTime / totalBurst) * 100);
+                    setExecProgress((executedTime / totalBurst) * 100);
 
                     setProcesses((prevProcesses) =>
                         prevProcesses.map((p) =>
@@ -110,12 +110,12 @@ const RoundRobinSimulator = () => {
                     );
 
                     // Record log for execution progress
-                    setExecutionLogs((prevLogs) => [
+                    setExecLogs((prevLogs) => [
                         ...prevLogs,
                         `Time ${executedTime}: Process ${process.id} executed (Remaining time: ${process.burstTime - 1})`,
                     ]);
 
-                    executionTime--;
+                    execTime--;
                 } else {
                     clearInterval(interval);
                     executeProcess();
@@ -130,8 +130,8 @@ const RoundRobinSimulator = () => {
     const saveLogsAsPDF = () => {
         const pdf = new jsPDF();
         pdf.text("Round Robin Scheduling Execution Logs", 10, 10);
-        
-        executionLogs.forEach((log, index) => {
+
+        execLogs.forEach((log, index) => {
             pdf.text(log, 10, 20 + index * 5);
         });
 
@@ -199,14 +199,14 @@ const RoundRobinSimulator = () => {
                 />
 
                 <label style={styles.label}>Time Quantum: </label>
-                    <input
-                        type="number"
-                        min="1"
-                        max="5"
-                        value={timeQuantum}
-                        onChange={(e) => setTimeQuantum(Number(e.target.value))}
-                        style={styles.input}
-                    />
+                <input
+                    type="number"
+                    min="1"
+                    max="5"
+                    value={timeQuantum}
+                    onChange={(e) => setTimeQuantum(Number(e.target.value))}
+                    style={styles.input}
+                />
 
                 <button onClick={() => generateRandomProcesses(numProcesses)} style={styles.generateButton}>
                     Generate Processes
@@ -215,7 +215,7 @@ const RoundRobinSimulator = () => {
 
             <Timer currentTime={currentTime} />
 
-            <ChartContainer processes={processes} executionProgress={executionProgress} />
+            <ChartContainer processes={processes} execProgress={execProgress} />
 
             <button onClick={saveLogsAsPDF} style={styles.button}>
                 Download
@@ -228,4 +228,4 @@ const RoundRobinSimulator = () => {
     );
 };
 
-export default RoundRobinSimulator;
+export default RR;

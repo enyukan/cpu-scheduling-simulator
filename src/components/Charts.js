@@ -2,10 +2,9 @@ import React from "react";
 import BarChart from "./BarChart";
 import PieChart from "./PieChart";
 
+const ChartContainer = ({ processes, execProgress }) => {
 
-const ChartContainer = ({ processes, executionProgress }) => {
-
-    const sortedProcesses = [...processes].sort((a,b) => a.arrival - b.arrival);
+    const sortedProcesses = [...processes].sort((a, b) => a.arrival - b.arrival);
 
     return (
         <div style={styles.container}>
@@ -14,17 +13,13 @@ const ChartContainer = ({ processes, executionProgress }) => {
                 <BarChart processes={sortedProcesses} />
             </div>
 
-
             <div style={styles.chartWrapper}>
-                <PieChart processes={sortedProcesses} executionProgress={executionProgress} />
+                <PieChart processes={sortedProcesses} execProgress={execProgress} />
             </div>
 
         </div>
     );
 };
-
-
-
 
 const styles = {
     container: {

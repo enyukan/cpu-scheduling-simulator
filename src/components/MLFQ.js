@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
-import ChartContainer from "./ChartContainer";
+import ChartContainer from "./Charts";
 import Timer from "./Timer";
 import { jsPDF } from "jspdf"; // Import jsPDF
 
-const MLFQSimulator = () => {
+const MLFQ = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
-    const [executionProgress, setExecutionProgress] = useState(0);
+    const [execProgress, setExecProgress] = useState(0);
     const [numProcesses, setNumProcesses] = useState(3);
     const [processes, setProcesses] = useState([]);
     const [executions, setExecutions] = useState({});
@@ -24,7 +24,7 @@ const MLFQSimulator = () => {
     const priorityBoostThreshold = 5;
 
     // Logs to display in the PDF
-    const [executionLogs, setExecutionLogs] = useState([]);
+    const [execLogs, setExecLogs] = useState([]);
 
     const colorMap = useRef({});
     const availableColors = ["#F4D1D6", "#D8A8C3", "#E4B9D9", "#A0B8B1", "#E1C7B0", "#D4D7E1", "#F1E1A6", "#F2C9A1", "#D4A79E", "#A3C9B2"];
@@ -62,7 +62,7 @@ const MLFQSimulator = () => {
         if (isRunning) return;
         setIsRunning(true);
         setCurrentTime(0);
-        setExecutionProgress(0);
+        setExecProgress(0);
         setCurrentQueue(null);
 
         let sortedProcesses = [...processes].sort((a, b) => a.arrival - b.arrival);
@@ -70,21 +70,20 @@ const MLFQSimulator = () => {
         runMLFQ(sortedProcesses);
     };
 
-    // MLFQ Scheduling algorithm
     const runMLFQ = async () => {
         let executedTime = 0;
         let queue0 = [...processes];
         let queue1 = [];
         let queue2 = [];
         let processExecutionCount = {};
-
+    
         const executeProcess = async () => {
             // Executes as long as at least one process exists in any queue
             while (queue0.length > 0 || queue1.length > 0 || queue2.length > 0) {
                 let currentProcess = null;
                 let quantum = 0;
                 let runningQueue = null;
-
+    
                 // If there is a process in queue0, take a process from queue0 and put it into runningQueue
                 if (queue0.length > 0) {
                     currentProcess = queue0.shift();
@@ -103,41 +102,41 @@ const MLFQSimulator = () => {
                     quantum = timeQuantum.q2;
                     runningQueue = "Q2";
                 }
-
+    
                 // State update to show the currently running queue
                 setCurrentQueue(runningQueue);
-
+    
                 // Run process
                 if (currentProcess) {
                     // Save the number of runs of each process
                     processExecutionCount[currentProcess.id] = (processExecutionCount[currentProcess.id] || 0) + quantum;
-
+    
                     // Running during a time quantum
                     for (let i = 0; i < quantum && currentProcess.burstTime > 0; i++) {
                         await new Promise((resolve) => setTimeout(resolve, 1000));
-
+    
                         currentProcess.burstTime -= 1;
                         executedTime += 1;
-
+    
                         // Increment current time
                         setCurrentTime((prev) => prev + 1);
-
+    
                         // Update total execution progress
-                        setExecutionProgress(
+                        setExecProgress(
                             (executedTime / processes.reduce((acc, p) => acc + p.initialBurst, 0)) * 100
                         );
-
+    
                         setProcesses((prevProcesses) =>
                             prevProcesses.map((p) =>
                                 p.id === currentProcess.id ? { ...p, burstTime: currentProcess.burstTime } : p
                             )
                         );
-
+    
                         // Log every second of execution
                         const log = `Time ${executedTime}: Process ${currentProcess.id} executed (Remaining time: ${currentProcess.burstTime})`;
-                        setExecutionLogs((prevLogs) => [...prevLogs, log]);
+                        setExecLogs((prevLogs) => [...prevLogs, log]); // Log added to previous logs
                     }
-
+    
                     // Priority Boosting logic and queue movements
                     if (currentProcess.burstTime > 0) {
                         if (processExecutionCount[currentProcess.id] >= priorityBoostThreshold) {
@@ -151,25 +150,26 @@ const MLFQSimulator = () => {
                             queue2.push(currentProcess);
                         }
                     }
-
+    
                     setQ0([...queue0]);
                     setQ1([...queue1]);
                     setQ2([...queue2]);
                 }
             }
-
+    
             setIsRunning(false);
         };
-
+    
         executeProcess();
     };
+    
 
     // Function to generate and download the PDF with logs
     const downloadLogs = () => {
         const doc = new jsPDF();
         doc.setFontSize(12);
         doc.text("MLFQ Scheduling Execution Logs", 20, 20);
-        executionLogs.forEach((log, index) => {
+        execLogs.forEach((log, index) => {
             doc.text(log, 20, 30 + (index * 10));
         });
         doc.save("MLFQ_Logs.pdf");
@@ -193,7 +193,7 @@ const MLFQSimulator = () => {
             </div>
 
             <Timer currentTime={currentTime} />
-            <ChartContainer processes={processes} executionProgress={executionProgress} />
+            <ChartContainer processes={processes} execProgress={execProgress} />
 
             {/* Status window for priority queue */}
             <div style={styles.queueContainer}>
@@ -249,4 +249,4 @@ const styles = {
     },
 };
 
-export default MLFQSimulator;
+export default MLFQ;

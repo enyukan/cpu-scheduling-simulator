@@ -1,14 +1,13 @@
 import React from 'react';
 
-// Define AlgorithmSection Component
-function AlgorithmSection({ id, title, description, SimulatorComponent }) {
-
+// Section Component
+function Section({ id, title, desc, Simulator }) {
     return (
         <section id={id} style={styles.section}>
             <h2>{title}</h2>
 
-            {/* Display the simulator automatically */}
-            {SimulatorComponent && <SimulatorComponent />}
+            {/* Display simulator if available */}
+            {Simulator && <Simulator />}
         </section>
     );
 }
@@ -22,4 +21,4 @@ const styles = {
     },
 };
 
-export default AlgorithmSection;
+export default Section;

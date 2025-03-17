@@ -14,25 +14,25 @@ function Header() {
 
 const styles = {
     header: {
-        background: "#e1eff0", // Header background black
-        color: "#507882", // Text white
+        background: "#e1eff0", 
+        color: "#507882", 
         textAlign: "center",
-        padding: "15px 30px", // Adjusted padding to make the header thinner
+        padding: "15px 30px",
         position: "fixed",
         width: "100%",
         top: 0,
         zIndex: 1000,
-        fontFamily: "'Playfair Display', serif", // Apply Playfair Display font
+        fontFamily: "'Playfair Display', serif",
     },
     title: {
         margin: "10px 0",
         fontSize: "40px",
     },
     subtitle: {
-        marginTop: "10px", // Add some space between the title and subtitle
-        fontSize: "16px",  // Smaller font size for the subtitle
-        color: "#507882",  // Same color as the title for consistency
-        fontStyle: "italic",  // Optional: Make the subtitle italic for distinction
+        marginTop: "10px", 
+        fontSize: "16px",  
+        color: "#507882",  
+        fontStyle: "italic",  
     },
 };
 

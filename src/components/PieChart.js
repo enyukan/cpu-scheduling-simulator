@@ -5,15 +5,15 @@ import React, { useEffect, useRef } from "react";
 Chart.register(...registerables);
 
 // Pie Chart Component (We need info about 'processes', 'executionProgress' to draw or update the chart)
-const PieChart = ({ processes, executionProgress }) => {
+const PieChart = ({ processes, execProgress }) => {
 
     // Space for drawing chart
     const chartRef = useRef(null);
 
     // Chart object
-    const chartInstance = useRef(null);
+    const chart = useRef(null);
 
-    // Execute the following code every time the value of processes or executionProgress changes
+    // Execute the following code every time the value of processes or execProgress changes
     useEffect(() => {
 
         if (!chartRef.current) return;
@@ -25,22 +25,22 @@ const PieChart = ({ processes, executionProgress }) => {
         const totalBurst = processes.reduce((acc, p) => acc + p.initialBurst, 0);
 
         // Convert the execution progress of each process to percentage (Array)
-        let executedPercentages = processes.map((p) => ((p.initialBurst - p.burstTime) / totalBurst) * 100);
+        let execPercentages = processes.map((p) => ((p.initialBurst - p.burstTime) / totalBurst) * 100);
 
         // Total cumulative progress
-        const executedSum = executedPercentages.reduce((acc, val) => acc + val, 0);
+        const execSum = execPercentages.reduce((acc, val) => acc + val, 0);
 
         // Current run rate for each process
-        executedPercentages.push(100 - executedSum);
+        execPercentages.push(100 - execSum);
 
         // Color each process (Remaining part -> gray(#D3D3D3))
         const colors = [...processes.map((p) => p.color), "#D3D3D3"]; 
 
         // If there is no chart
-        if (!chartInstance.current) {
+        if (!chart.current) {
 
             // Draw Initial Chart
-            chartInstance.current = new Chart(ctx, {
+            chart.current = new Chart(ctx, {
 
                 type: "doughnut",
 
@@ -49,7 +49,7 @@ const PieChart = ({ processes, executionProgress }) => {
 
                     datasets: [
                         {
-                            data: executedPercentages,
+                            data: execPercentages,
                             backgroundColor: colors,
                         },
                     ],
@@ -86,11 +86,11 @@ const PieChart = ({ processes, executionProgress }) => {
         } else {
 
             // Update Chart
-            chartInstance.current.data.datasets[0].data = [...executedPercentages]; 
-            chartInstance.current.data.datasets[0].backgroundColor = [...colors]; 
-            chartInstance.current.update("active");
+            chart.current.data.datasets[0].data = [...execPercentages]; 
+            chart.current.data.datasets[0].backgroundColor = [...colors]; 
+            chart.current.update("active");
         }
-    }, [processes, executionProgress]);
+    }, [processes, execProgress]);
 
     return <canvas ref={chartRef} style={styles.canvas}></canvas>;
 };

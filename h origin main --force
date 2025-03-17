@@ -1,0 +1,125 @@
+[33mcommit c3d99b7acb00898c7138b425771cd3ecaa4496ba[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Sun Mar 16 22:30:09 2025 -0500
+
+    Final Debug
+
+[33mcommit bd609cba86eedc97af5e8efacff9493632286069[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Sun Mar 16 20:51:03 2025 -0500
+
+    Fix MLFQ
+
+[33mcommit c40ff083c009d03e80a93bc48440194b681bafef[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Sun Mar 16 20:43:59 2025 -0500
+
+    Fix SJB logic
+
+[33mcommit 9cd465999732be725c322dde551236b991e7b9f3[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Sun Mar 16 20:18:45 2025 -0500
+
+    Bug Fix: Execution Time
+
+[33mcommit c7dbd9a27d7aee9fe7e8c59c30baf27ce5e7bb88[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Sun Mar 16 19:58:37 2025 -0500
+
+    Bug Fix: FIFO
+
+[33mcommit a12d7a93b63b63462624a6f988552ba2c3d7ea91[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Sun Mar 16 19:29:22 2025 -0500
+
+    Add Printing to PDF for MLFQ
+
+[33mcommit b60e7d040316ce4d06305369f49c718f54c331c3[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Sun Mar 16 19:19:02 2025 -0500
+
+    Add Printing to PDF for MLFQ
+
+[33mcommit 57de0009849d66caadfd31855eb38ec19cebcbd1[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Sun Mar 16 18:06:03 2025 -0500
+
+    Adjust Color
+
+[33mcommit 06e886b23934044c5a6de5eadd82c762831c573e[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Sun Mar 16 17:04:04 2025 -0500
+
+    Remove Redundant Code
+
+[33mcommit d65ed596bc836c482a4fef861231af06ca45a1f0[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Sun Mar 16 16:32:05 2025 -0500
+
+    Remove deleted files from the repository
+
+[33mcommit aa218005abfb7511fd186d2c8e324e66deb1045f[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Sun Mar 16 16:22:37 2025 -0500
+
+    Modify functions
+
+[33mcommit c47603d8424bb38bd3e58082153968305d4a49bb[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Thu Mar 6 10:19:49 2025 -0600
+
+    Implemented MLFQ  scheduling algorithm
+
+[33mcommit 9343e252778b47b2c234ccce9039cc8c7d71e69a[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Thu Mar 6 09:34:59 2025 -0600
+
+    Implemented RR scheduling algorithm
+
+[33mcommit 545ffc66c83f94920cc97fd8d7d1e74c2053ce6f[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Thu Mar 6 08:41:50 2025 -0600
+
+    Implemented STCF scheduling algorithm
+
+[33mcommit 75d9602bf055115889e0cade35368e2fe4b2eb5b[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Wed Mar 5 18:08:29 2025 -0600
+
+    Implemented SJF scheduling algorithm
+
+[33mcommit a586cad97e7603a2f593730444795885e07892b7[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Wed Mar 5 13:39:08 2025 -0600
+
+    Implemented FIFO scheduling algorithm
+
+[33mcommit 8e00a359e9afbafa2e77c85ff42c8e8c1b57866c[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Wed Mar 5 13:16:47 2025 -0600
+
+    Added process generation with random arrival and burst times
+
+[33mcommit 433c0c3755a9ad4448b14fd0c3ec51d775cf5d93[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Wed Mar 5 12:51:07 2025 -0600
+
+    Added UI controls for process count and time quantum
+
+[33mcommit cf4a46ff998940f72315d125ea0dd23ef07d8331[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Tue Mar 4 12:11:01 2025 -0600
+
+    Install Dependencies
+
+[33mcommit 5b859783aaf46159e14a61bc41fa165b63cf074c[m
+Author: enyukan <enyukan@gmail.com>
+Date:   Tue Mar 4 11:58:15 2025 -0600
+
+    Initial commit - Set up project
+
+[33mcommit a72c25d7c0812f06cd04e35a4b726b8aeb6b2bd7[m
+Author: Enyu Kan <enyukan@gmail.com>
+Date:   Tue Mar 4 11:26:26 2025 -0600
+
+    Initial commit

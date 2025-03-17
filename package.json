@@ -3,6 +3,7 @@
     "@reduxjs/toolkit": "^2.5.1",
     "chart.js": "^4.4.8",
     "d3": "^7.9.0",
+    "gh-pages": "^6.3.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.0",
     "react": "^19.0.0",
@@ -15,7 +16,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "browserslist": {
     "production": [
@@ -28,5 +31,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "homepage": "https://enyukan.github.io/cpu-scheduling-simulator"
 }

@@ -118,7 +118,7 @@ const FIFO = () => {
             <ChartContainer processes={processes} executionProgress={execProgress} />
 
             <button onClick={saveLogs} style={styles.button}>
-                Download Logs
+                Download
             </button>
 
             <button onClick={startSim} disabled={isRunning} style={styles.button}>

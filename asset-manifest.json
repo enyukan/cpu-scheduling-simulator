@@ -1,0 +1,18 @@
+{
+  "files": {
+    "main.css": "/cpu-scheduling-simulator/static/css/main.ea4f91fd.css",
+    "main.js": "/cpu-scheduling-simulator/static/js/main.40550b64.js",
+    "static/js/239.c9086849.chunk.js": "/cpu-scheduling-simulator/static/js/239.c9086849.chunk.js",
+    "static/js/977.e463868d.chunk.js": "/cpu-scheduling-simulator/static/js/977.e463868d.chunk.js",
+    "static/js/732.e10ad9d0.chunk.js": "/cpu-scheduling-simulator/static/js/732.e10ad9d0.chunk.js",
+    "index.html": "/cpu-scheduling-simulator/index.html",
+    "main.ea4f91fd.css.map": "/cpu-scheduling-simulator/static/css/main.ea4f91fd.css.map",
+    "main.40550b64.js.map": "/cpu-scheduling-simulator/static/js/main.40550b64.js.map",
+    "239.c9086849.chunk.js.map": "/cpu-scheduling-simulator/static/js/239.c9086849.chunk.js.map",
+    "732.e10ad9d0.chunk.js.map": "/cpu-scheduling-simulator/static/js/732.e10ad9d0.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ea4f91fd.css",
+    "static/js/main.40550b64.js"
+  ]
+}

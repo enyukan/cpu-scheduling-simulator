@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ChartContainer from "./Charts";
 import Timer from "./Timer";
 import jsPDF from "jspdf";
-
 const SJF = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
-    const [executionProgress, setExecutionProgress] = useState(0);
+    const [execProgress, setExecProgress] = useState(0);
     const [numProcesses, setNumProcesses] = useState(3);
     const [processes, setProcesses] = useState([]);
-    const [executionLogs, setExecutionLogs] = useState([]);
+    const [execLogs, setExecLogs] = useState([]);
 
     const colorMap = useRef({});
     const availableColors = ["#F4D1D6", "#D8A8C3", "#E4B9D9", "#A0B8B1", "#E1C7B0", "#D4D7E1", "#F1E1A6", "#F2C9A1", "#D4A79E", "#A3C9B2"];
 
+    // Function to get color for each process
     const getColorForProcess = (id) => {
         if (!colorMap.current[id]) {
             colorMap.current[id] = availableColors[Object.keys(colorMap.current).length % availableColors.length];
@@ -21,82 +21,125 @@ const SJF = () => {
         return colorMap.current[id];
     };
 
-    const generateProcesses = (count) => {
-        let newProcesses = Array.from({ length: count }, (_, i) => ({
-            id: `P${i + 1}`,
-            arrival: Math.floor(Math.random() * 6),
-            burstTime: Math.floor(Math.random() * 6) + 2,
-            initialBurst: 0,
-            color: getColorForProcess(`P${i + 1}`),
-        }));
+    // Generate random processes
+    const generateRandomProcesses = (count) => {
+        let newProcesses = Array.from({ length: count }, (_, i) => {
+            const processId = `P${i + 1}`;
+            return {
+                id: processId,
+                arrival: Math.floor(Math.random() * 6),
+                burstTime: Math.floor(Math.random() * 6) + 2,
+                initialBurst: 0,
+                color: getColorForProcess(processId),
+            };
+        });
 
-        newProcesses.sort((a, b) => a.arrival - b.arrival);
+        // Sort in ascending order based on arrival time
+        newProcesses = newProcesses.sort((a, b) => a.arrival - b.arrival);
+
+        // Save the initial burstTime separately to remember the initial execution order even during execution
         newProcesses = newProcesses.map((p) => ({ ...p, initialBurst: p.burstTime }));
 
         setProcesses(newProcesses);
-        setExecutionProgress(0);
-        setExecutionLogs([]);
+        setExecLogs([]);
     };
 
+    // Start simulation
     const startSim = () => {
         if (isRunning) return;
         setIsRunning(true);
-        setCurrentTime(0);
-        setExecutionProgress(0);
-        setExecutionLogs([]);
-
-        let processList = [...processes].map((p) => ({ ...p, remainingTime: p.burstTime }));
-        let executedTime = 0;
-        let time = 0;
-
-        let readyQueue = [];
-        let executionQueue = [];
-
-        const interval = setInterval(() => {
-            if (processList.length > 0) {
-                let nextProcess = processList.shift();
-                readyQueue.push(nextProcess);
-            }
-
-            if (readyQueue.length > 0) {
-                readyQueue.sort((a, b) => a.burstTime - b.burstTime || a.arrival - b.arrival);
-                let shortestJob = readyQueue.shift();
-                executionQueue.push(shortestJob);
-
-                shortestJob.remainingTime -= 1;
-                executedTime++;
-                time++;
-
-                const totalBurst = processes.reduce((acc, p) => acc + p.initialBurst, 0);
-                setExecutionProgress((executedTime / totalBurst) * 100);
-                setProcesses((prevProcesses) =>
-                    prevProcesses.map((p) => (p.id === shortestJob.id ? { ...p, burstTime: shortestJob.remainingTime } : p))
-                );
-                setCurrentTime(time);
-
-                setExecutionLogs((prevLogs) => [
-                    ...prevLogs,
-                    `Time ${executedTime}: Process ${shortestJob.id} executed (Remaining time: ${shortestJob.remainingTime})`,
-                ]);
-
-                if (shortestJob.remainingTime > 0) {
-                    readyQueue.push(shortestJob);
-                }
-            }
-
-            if (readyQueue.length === 0 && processList.length === 0) {
-                clearInterval(interval);
-                setIsRunning(false);
-            }
-        }, 1000);
+        setExecProgress(0);
+        setExecLogs([]);
+        runSJF();
     };
-
+    const runSJF = () => {
+        let totalBurst = processes.reduce((acc, p) => acc + p.burstTime, 0); // Total burst time for progress calculation
+        let executedTime = 0;
+        let currentTime = 0; // Track the current simulation time
+        let queue = [...processes]; // Queue to hold processes
+        let remainingProcesses = [...processes]; // Track processes yet to be executed
+        let isProcessing = false;
+    
+        // Recursive function to execute processes
+        const executeProcess = () => {
+            // Filter out processes that have not arrived yet
+            let availableProcesses = remainingProcesses.filter(p => p.arrival <= currentTime && p.burstTime > 0);
+    
+            // If no processes are ready, wait for the next process to arrive (if any)
+            if (availableProcesses.length === 0) {
+                const nextArrivalTime = Math.min(...remainingProcesses.filter(p => p.burstTime > 0).map(p => p.arrival));
+                if (nextArrivalTime > currentTime) {
+                    // Skip time to the next arrival (simulate clock progression)
+                    setTimeout(() => {
+                        currentTime = nextArrivalTime;
+                        setCurrentTime(currentTime);
+                        executeProcess(); // Recurse after advancing time
+                    }, 500);
+                } else {
+                    setTimeout(executeProcess, 500); // Wait and check again
+                }
+                return;
+            }
+    
+            // Sort available processes by burst time (Shortest Job First)
+            availableProcesses.sort((a, b) => a.burstTime - b.burstTime);
+            let processToExecute = availableProcesses[0]; // Select the shortest burst time process
+    
+            let burstLeft = processToExecute.burstTime;
+            let process = processToExecute;
+    
+            // Log the execution of the selected process
+            const interval = setInterval(() => {
+                if (burstLeft > 0) {
+                    // Decrease the burst time of the current process
+                    burstLeft--;
+                    executedTime++;
+                    currentTime++;
+    
+                    // Update UI states
+                    setExecProgress((executedTime / totalBurst) * 100);
+                    setCurrentTime(currentTime);
+    
+                    // Update process burst time in the state
+                    setProcesses((prevProcesses) =>
+                        prevProcesses.map((p) =>
+                            p.id === process.id ? { ...p, burstTime: burstLeft, color: p.color } : p
+                        )
+                    );
+    
+                    // Log the execution progress
+                    setExecLogs((prevLogs) => [
+                        ...prevLogs,
+                        `Time ${executedTime}: Process ${process.id} executed (Remaining time: ${burstLeft})`,
+                    ]);
+                } else {
+                    // Once process finishes, mark it as completed and move to the next process
+                    clearInterval(interval);
+                    remainingProcesses = remainingProcesses.filter(p => p.id !== process.id); // Remove completed process
+    
+                    if (remainingProcesses.length > 0) {
+                        executeProcess(); // Continue with the next process
+                    } else {
+                        setIsRunning(false); // All processes are finished
+                        setExecLogs((prevLogs) => [...prevLogs, `Simulation complete at time ${currentTime}`]);
+                    }
+                }
+            }, 500); // Process runs every 0.5 second
+        };
+    
+        executeProcess(); // Start the execution
+    };
+    
+    
+    // Save execution process log as pdf
     const saveLogsAsPDF = () => {
         const pdf = new jsPDF();
-        pdf.text("SJF Scheduling Logs", 10, 10);
-        executionLogs.forEach((log, index) => {
+        pdf.text("SJF Scheduling Execution Logs", 10, 10);
+
+        execLogs.forEach((log, index) => {
             pdf.text(log, 10, 20 + index * 5);
         });
+
         pdf.save("SJF_Logs.pdf");
     };
 
@@ -112,13 +155,14 @@ const SJF = () => {
                     onChange={(e) => setNumProcesses(Number(e.target.value))}
                     style={styles.input}
                 />
-                <button onClick={() => generateProcesses(numProcesses)} style={styles.generateButton}>
+                <button onClick={() => generateRandomProcesses(numProcesses)} style={styles.generateButton}>
                     Generate Processes
                 </button>
             </div>
 
             <Timer currentTime={currentTime} />
-            <ChartContainer processes={processes} executionProgress={executionProgress} />
+
+            <ChartContainer processes={processes} execProgress={execProgress} />
 
             <button onClick={saveLogsAsPDF} style={styles.button}>
                 Download
